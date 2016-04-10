@@ -7,7 +7,7 @@ var receipt = require('./Receipt/receiptAPI');
 
 
 //Register all API-Module Routes here
-app.use('/api', receipt); //This is our route middleware
+app.use('/api', receipt); //Receipt API
 
 
 

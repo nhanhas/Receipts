@@ -3,8 +3,11 @@
 
 // call the packages we need
 var express    = require('express');        // call express
-var Receipt = require('./receipt');
 var router = express.Router();
+
+//Load VOs
+var Receipt = require('./receipt');
+var ReceiptProduct = require('./receiptProduct');
 
 
 // =============================================API ROUTES=====================================================
@@ -20,25 +23,40 @@ router.use(function(req, res, next) {
 // on routes that end in /bears
 // ----------------------------------------------------
 router.route('/receipts')
-    // create a bear (accessed at POST http://localhost:8080/api/bears)
     .post(function(req, res) {
 
-        var receipt = new Receipt();      // create a new instance of the Bear model
-        receipt.name = req.body.name;  // set the bears name (comes from the request)
+        //Instantiate the new Recipe and new Product
+        var receipt = new Receipt();
+        var receiptProduct = new ReceiptProduct();
 
-        // save the bear and check for errors
+        //Fulfill the Recipe
+        receipt.name = req.body.name;
+        receipt.receiptProducts = [];
+        receipt.receiptProducts.push(receiptProduct._id);
+        //Fulfill the Product
+        receiptProduct.design = req.body.design;
+        receiptProduct._receiptid = receipt._id;
+
+        // Save the recipe header
         receipt.save(function(err) {
             if (err)
                 res.send(err);
 
-            res.json({ message: 'Receipt created!' });
+            // Save the recipe product
+            receiptProduct.save(function(err){
+                if (err)
+                    res.send(err);
+                res.json({ message: 'Receipt created!' });
+            });
+
+
         });
 
     })
 
     // get all the bears (accessed at GET http://localhost:8080/api/bears)
     .get(function(req, res) {
-        Receipt.find(function(err, receipts) {
+        Receipt.find({}).populate('receiptProducts').exec(function(err, receipts) {
             if (err)
                 res.send(err);
 
